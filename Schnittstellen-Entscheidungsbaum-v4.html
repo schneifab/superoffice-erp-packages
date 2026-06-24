@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Schnittstellen-Entscheidung · SuperOffice Presales</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* SuperOffice Brand: Primär #06423e · Sekundär #b2c7eb / #f2efea · Akzent #712f4a / #f48a6d */
+    --paper:#F2EFEA; --surface:#FFFFFF; --surface-2:#F7F4EF;
+    --ink:#0C2A27; --ink-soft:#3A4B48; --line:#DED7CC;
+    --petrol:#06423e; --petrol-dk:#03302C; --petrol-tint:#DCE7E4;
+    /* Koralle = REST-Signal (ersetzt Amber) */
+    --amber:#C25A3C; --amber-tint:#FBE3DA; --amber-line:#F0B7A4;
+    /* Bordeaux = harter Konflikt-Akzent */
+    --red:#712f4a; --red-tint:#F3E0E7; --red-line:#D9AEBE;
+    --green:#1f7a4d;
+    /* Hellblau = informativer Hinweis */
+    --info:#3F5C8A; --info-tint:#E3EAF6; --info-line:#B2C7EB;
+    --slate:#6A6258;
+    --shadow:0 1px 0 rgba(6,66,62,.04), 0 18px 40px -24px rgba(6,66,62,.32);
+    --r:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{font-family:"IBM Plex Sans",system-ui,sans-serif;
+    background:radial-gradient(120% 80% at 12% -10%, #FBFAF7 0%, transparent 55%), var(--paper);
+    color:var(--ink); line-height:1.55; min-height:100vh; -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1140px;margin:0 auto;padding:28px 22px 64px;
+    display:grid;grid-template-columns:236px 1fr;gap:30px;align-items:start}
+
+  .rail{position:sticky;top:28px}
+  .brand{font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:18px;
+    letter-spacing:-.01em;color:var(--petrol-dk);line-height:1.15;margin-bottom:4px}
+  .brand small{display:block;font-family:"IBM Plex Mono",monospace;font-weight:500;
+    font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--slate);margin-top:7px}
+  .path{margin-top:26px;position:relative}
+  .path::before{content:"";position:absolute;left:10px;top:8px;bottom:8px;width:2px;background:var(--line)}
+  .pfill{position:absolute;left:10px;top:8px;width:2px;background:var(--petrol);height:0;
+    transition:height .5s cubic-bezier(.4,0,.2,1)}
+  .pstep{position:relative;display:flex;gap:13px;padding:9px 0;align-items:flex-start}
+  .pdot{flex:0 0 22px;height:22px;border-radius:50%;background:var(--surface);
+    border:2px solid var(--line);display:grid;place-items:center;
+    font-family:"IBM Plex Mono",monospace;font-size:9px;font-weight:600;color:var(--slate);z-index:1;transition:.35s}
+  .pstep.active .pdot{border-color:var(--petrol);color:var(--petrol);box-shadow:0 0 0 4px var(--petrol-tint)}
+  .pstep.done .pdot{background:var(--petrol);border-color:var(--petrol);color:#fff}
+  .pmeta{padding-top:1px}
+  .pmeta .k{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--slate)}
+  .pmeta .t{font-size:13px;font-weight:600;color:var(--ink-soft);line-height:1.25}
+  .pstep.active .pmeta .t,.pstep.done .pmeta .t{color:var(--ink)}
+  .railnote{margin-top:22px;font-size:11.5px;color:var(--slate);border-top:1px solid var(--line);padding-top:14px}
+
+  .stage{min-height:60vh}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+    box-shadow:var(--shadow);padding:34px 36px;animation:rise .42s cubic-bezier(.2,.7,.3,1)}
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--petrol);font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:9px}
+  .eyebrow::before{content:"";width:22px;height:2px;background:var(--petrol)}
+  h1{font-family:"Space Grotesk",sans-serif;font-weight:600;font-size:30px;letter-spacing:-.02em;line-height:1.12;margin-bottom:12px}
+  .q{font-family:"Space Grotesk",sans-serif;font-weight:600;font-size:23px;letter-spacing:-.015em;line-height:1.22;margin-bottom:6px}
+  .lead{font-size:15px;color:var(--ink-soft);max-width:54ch}
+  .hint{font-size:13px;color:var(--slate);margin-top:9px;max-width:58ch}
+  .multi-tag{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--slate);background:var(--surface-2);border:1px solid var(--line);
+    border-radius:20px;padding:3px 11px;margin-top:14px}
+
+  .opts{margin-top:22px;display:grid;gap:11px}
+  .opt{display:flex;gap:15px;align-items:flex-start;text-align:left;width:100%;cursor:pointer;
+    background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:16px 18px;font:inherit;color:inherit;transition:.16s}
+  .opt:hover{border-color:var(--petrol);background:var(--surface-2)}
+  .opt:focus-visible{outline:3px solid var(--petrol-tint);outline-offset:2px}
+  .opt.sel{border-color:var(--petrol);background:var(--petrol-tint)}
+  .opt .box{flex:0 0 20px;height:20px;border-radius:6px;border:2px solid var(--line);margin-top:2px;
+    display:grid;place-items:center;transition:.16s}
+  .opt.radio .box{border-radius:50%}
+  .opt.sel .box{background:var(--petrol);border-color:var(--petrol)}
+  .opt .box svg{width:12px;height:12px;opacity:0;transition:.16s}
+  .opt.sel .box svg{opacity:1}
+  .opt .opttext{display:flex;flex-direction:column;gap:3px;min-width:0}
+  .opt .ot{display:block;font-weight:600;font-size:15.5px;letter-spacing:-.005em;line-height:1.3}
+  .opt .od{display:block;font-size:13px;color:var(--ink-soft);line-height:1.45}
+  .opt .pill{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;
+    padding:2px 8px;border-radius:5px;margin-left:8px;vertical-align:middle;white-space:nowrap}
+  .pill-rest{background:var(--amber-tint);color:var(--amber)}
+  .pill-tier{background:var(--petrol-tint);color:var(--petrol-dk)}
+  .pill-mod{background:var(--info-tint);color:var(--info)}
+  .pill-ext{background:var(--info-tint);color:var(--info)}
+
+  /* Externe „Individuell"-Karte */
+  .opt.tier-ext{border-style:dashed;border-color:var(--info-line)}
+  .opt.tier-ext:hover{border-color:var(--info);background:var(--info-tint)}
+  .opt.tier-ext.sel{border-style:solid;border-color:var(--info);background:var(--info-tint)}
+  .opt.tier-ext.sel .box{background:var(--info);border-color:var(--info)}
+  .ext-hint{display:inline-flex;align-items:center;gap:6px;margin-top:11px;font-family:"IBM Plex Mono",monospace;
+    font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--info);font-weight:600}
+
+  /* tier cards */
+  .tierbody{flex:1}
+  .tierhead{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .meta{display:block;font-size:13px;color:var(--ink-soft);margin-top:7px;line-height:1.45}
+  .meta b{color:var(--ink);font-weight:600}
+  .incl{display:flex;gap:18px;margin-top:11px;flex-wrap:wrap}
+  .incl .col{flex:1 1 200px;font-size:12.5px;line-height:1.4}
+  .incl .lbl{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:3px}
+  .incl .yes .lbl{color:var(--green)} .incl .no .lbl{color:var(--slate)}
+  .incl .yes{color:var(--ink-soft)} .incl .no{color:var(--slate)}
+  .warn-inline{display:block;margin-top:7px;font-size:12px;color:var(--amber);background:var(--amber-tint);
+    border-radius:7px;padding:6px 10px;line-height:1.4}
+
+  /* Inline-Plausibilitäts-Hinweise direkt im Schritt */
+  .inline-flag{display:flex;gap:11px;align-items:flex-start;border-radius:11px;padding:13px 16px;margin-top:16px;
+    font-size:13px;line-height:1.5;animation:rise .3s cubic-bezier(.2,.7,.3,1)}
+  .inline-flag.req{background:var(--red-tint);border:1px solid var(--red-line);color:var(--red)}
+  .inline-flag.soft{background:var(--amber-tint);border:1px solid var(--amber-line);color:#8A3A22}
+  .inline-flag .ic{flex:0 0 18px;font-weight:700;font-family:"Space Grotesk",sans-serif;margin-top:1px}
+  .inline-flag b{font-weight:600}
+  .nav .reqhint{font-size:12.5px;color:var(--red);font-weight:500;display:flex;align-items:center;gap:6px;margin-right:4px}
+  .nav .reqhint .dotpulse{width:7px;height:7px;border-radius:50%;background:var(--red);
+    animation:pulse 1.6s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:.35;transform:scale(.85)}50%{opacity:1;transform:scale(1)}}
+
+  .nav{display:flex;gap:12px;margin-top:28px;align-items:center;flex-wrap:wrap}
+  .btn{font:inherit;font-weight:600;font-size:14.5px;border-radius:10px;padding:12px 24px;cursor:pointer;
+    border:1.5px solid transparent;transition:.16s;display:inline-flex;align-items:center;gap:9px}
+  .btn-primary{background:var(--petrol);color:#fff}
+  .btn-primary:hover{background:var(--petrol-dk)}
+  .btn-primary:disabled{background:var(--line);color:var(--slate);cursor:not-allowed}
+  .btn-ghost{background:transparent;color:var(--ink-soft);border-color:var(--line)}
+  .btn-ghost:hover{border-color:var(--petrol);color:var(--petrol)}
+  .btn:focus-visible{outline:3px solid var(--petrol-tint);outline-offset:2px}
+  .spacer{flex:1}
+  .stepcount{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--slate);letter-spacing:.08em}
+
+  .res-head{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:4px}
+  .badge{border-radius:11px;padding:14px 18px;flex:1 1 200px;border:1.5px solid var(--line)}
+  .badge .bk{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--slate);margin-bottom:6px}
+  .badge .bv{font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:20px;letter-spacing:-.01em;line-height:1.12}
+  .badge.pkg{background:var(--petrol);border-color:var(--petrol)}
+  .badge.pkg .bk{color:#9CC9C4}.badge.pkg .bv{color:#fff}.badge.pkg .bt{color:#CFE6E3;font-size:12.5px;margin-top:4px}
+  .badge.tech-db{background:var(--surface-2)} .badge.tech-db .bv{color:var(--slate)}
+  .badge.tech-rest{background:var(--amber-tint);border-color:var(--amber-line)}.badge.tech-rest .bv{color:var(--amber)}
+  .badge.tech-hybrid{background:linear-gradient(100deg,var(--surface-2) 0 50%,var(--amber-tint) 50% 100%)}
+  .badge.tech-hybrid .bv{color:var(--petrol-dk)}
+  .badge .bt{font-size:12.5px;color:var(--ink-soft);margin-top:5px;font-weight:400;line-height:1.4}
+  .modtags{margin-top:12px;display:flex;gap:7px;flex-wrap:wrap}
+  .modtag{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.06em;background:var(--info-tint);
+    color:var(--info);border-radius:6px;padding:4px 10px}
+
+  .block{margin-top:22px}
+  .block h3{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--petrol);font-weight:600;margin-bottom:11px}
+  .strecke{display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:14.5px}
+  .strecke:last-child{border-bottom:none}
+  .dir{font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:600;color:#fff;background:var(--slate);padding:3px 8px;border-radius:5px;white-space:nowrap}
+  .dir.rest{background:var(--amber)}
+  .arg{display:flex;gap:11px;padding:7px 0;font-size:14px;color:var(--ink-soft)}
+  .arg::before{content:"";flex:0 0 7px;height:7px;border-radius:50%;background:var(--petrol);margin-top:8px}
+  .cost{background:var(--surface-2);border:1px solid var(--line);border-radius:11px;padding:16px 18px;font-size:13.5px;color:var(--ink-soft)}
+  .cost b{color:var(--ink)}
+  .eff{margin-top:2px}
+  .effrow{display:grid;grid-template-columns:184px 116px 1fr;gap:16px;align-items:baseline;padding:12px 0;border-bottom:1px dashed var(--line)}
+  .effrow:last-child{border-bottom:none}
+  .effp{font-weight:600;font-size:14px}
+  .effv{font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:18px;color:var(--petrol-dk);white-space:nowrap}
+  .effd{font-size:12.5px;color:var(--slate);line-height:1.45}
+  .effnote{font-size:12px;color:var(--slate);font-style:italic;margin-top:12px}
+  .warn{display:flex;gap:13px;border-radius:11px;padding:15px 18px;margin-top:14px;font-size:13.5px;line-height:1.5}
+  .warn.red{background:var(--red-tint);border:1px solid var(--red-line);color:var(--red)}
+  .warn.amber{background:var(--amber-tint);border:1px solid var(--amber-line);color:#8A3A22}
+  .warn.info{background:var(--info-tint);border:1px solid var(--info-line);color:var(--info)}
+  .warn .ic{flex:0 0 18px;font-weight:700;font-family:"Space Grotesk",sans-serif}
+  .warn b{font-weight:600}
+  .dead{text-align:center;padding:26px 10px}
+  .dead .big{font-family:"Space Grotesk",sans-serif;font-size:46px;color:var(--red);font-weight:700}
+
+  /* Exit-Overlay (Weiterleitung zum externen Calculator) */
+  .exit-ov{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:22px;
+    background:rgba(6,66,62,.34);backdrop-filter:blur(3px);opacity:0;transition:opacity .22s}
+  .exit-ov.show{opacity:1}
+  .exit-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+    box-shadow:0 30px 70px -28px rgba(6,66,62,.55);max-width:480px;width:100%;padding:32px 34px;
+    transform:translateY(12px) scale(.98);transition:transform .24s cubic-bezier(.2,.7,.3,1)}
+  .exit-ov.show .exit-card{transform:none}
+  .exit-ic{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;
+    background:var(--info-tint);color:var(--info);font-size:24px;font-weight:700;margin-bottom:16px}
+  .exit-eyebrow{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--info);font-weight:600;margin-bottom:8px}
+  .exit-card h2{font-family:"Space Grotesk",sans-serif;font-weight:600;font-size:23px;
+    letter-spacing:-.015em;line-height:1.2;margin-bottom:11px}
+  .exit-card p{font-size:14px;color:var(--ink-soft);line-height:1.55;margin-bottom:10px}
+  .exit-url{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--slate);
+    background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:9px 12px;
+    word-break:break-all;margin-bottom:4px}
+  .exit-nav{display:flex;gap:11px;margin-top:20px;justify-content:flex-end;align-items:center}
+  .exit-nav .btn{text-decoration:none}
+
+  /* Ergebnis-Toolbar & Modus-Schalter */
+  .resbar{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;
+    margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid var(--line)}
+  .modeswitch{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:3px}
+  .modeswitch .ms{font:inherit;font-size:13px;font-weight:600;border:none;background:transparent;color:var(--ink-soft);
+    padding:7px 15px;border-radius:7px;cursor:pointer;transition:.16s}
+  .modeswitch .ms.on{background:var(--petrol);color:#fff}
+  .modeswitch .ms:not(.on):hover{color:var(--petrol)}
+  .lockedtag{display:inline-flex;align-items:center;font-family:"IBM Plex Mono",monospace;font-size:11px;
+    font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--petrol-dk);
+    background:var(--petrol-tint);border:1px solid var(--petrol);border-radius:8px;padding:7px 14px}
+
+  /* History auf der Startseite */
+  .hist{margin-top:28px;border-top:1px solid var(--line);padding-top:20px}
+  .hist-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px}
+  .hist-title{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--petrol);font-weight:600}
+  .hist-clear{font:inherit;font-size:12px;font-weight:500;color:var(--slate);background:none;border:none;
+    cursor:pointer;padding:2px 4px;transition:.16s}
+  .hist-clear:hover{color:var(--red)}
+  .hist-list{display:flex;flex-direction:column;gap:8px}
+  .hist-item{display:flex;align-items:stretch;gap:8px}
+  .hist-open{flex:1;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;
+    background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:12px 15px;font:inherit;
+    color:inherit;text-align:left;transition:.16s}
+  .hist-open:hover{border-color:var(--petrol);background:var(--surface-2)}
+  .hist-open:focus-visible{outline:3px solid var(--petrol-tint);outline-offset:2px}
+  .hist-main{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .hist-pkg{font-weight:600;font-size:14.5px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .hist-meta{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--slate)}
+  .hist-tech{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;
+    font-weight:600;padding:3px 9px;border-radius:6px;white-space:nowrap;flex:0 0 auto}
+  .hist-tech.h-db{background:var(--surface-2);color:var(--slate);border:1px solid var(--line)}
+  .hist-tech.h-rest{background:var(--amber-tint);color:var(--amber)}
+  .hist-tech.h-hybrid{background:var(--petrol-tint);color:var(--petrol-dk)}
+  .hist-del{flex:0 0 40px;cursor:pointer;background:var(--surface);border:1.5px solid var(--line);border-radius:10px;
+    color:var(--slate);font-size:20px;line-height:1;transition:.16s}
+  .hist-del:hover{border-color:var(--red);color:var(--red);background:var(--red-tint)}
+  .hist-note{display:flex;gap:10px;align-items:flex-start;margin-top:14px;background:var(--info-tint);
+    border:1px solid var(--info-line);border-radius:10px;padding:11px 14px;font-size:12px;color:var(--info);line-height:1.45}
+  .hist-note-ic{flex:0 0 16px;height:16px;border-radius:50%;background:var(--info);color:#fff;font-weight:700;
+    font-size:11px;display:grid;place-items:center;margin-top:1px}
+  .link-opts{display:flex;flex-direction:column;gap:11px;margin:18px 0 4px}
+  .link-opt{text-align:left;width:100%;cursor:pointer;background:var(--surface);border:1.5px solid var(--line);
+    border-radius:11px;padding:14px 16px;font:inherit;color:inherit;transition:.16s}
+  .link-opt:hover{border-color:var(--petrol);background:var(--surface-2)}
+  .link-opt:focus-visible{outline:3px solid var(--petrol-tint);outline-offset:2px}
+  .lo-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px}
+  .lo-name{font-weight:600;font-size:15.5px;color:var(--ink)}
+  .lo-pill{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;
+    padding:3px 9px;border-radius:6px;white-space:nowrap}
+  .lo-pill.cust{background:var(--petrol-tint);color:var(--petrol-dk)}
+  .lo-pill.int{background:var(--info-tint);color:var(--info)}
+  .lo-desc{font-size:12.5px;color:var(--ink-soft);line-height:1.4}
+  .resactions{display:flex;gap:8px;flex-wrap:wrap}
+  .btn-sm{font:inherit;font-size:12.5px;font-weight:600;border:1.5px solid var(--line);background:var(--surface);
+    color:var(--ink-soft);border-radius:8px;padding:7px 13px;cursor:pointer;transition:.16s}
+  .btn-sm:hover{border-color:var(--petrol);color:var(--petrol)}
+  .kbanner{background:var(--petrol);color:#fff;border-radius:10px;padding:10px 15px;font-size:12.5px;
+    font-weight:500;margin-bottom:18px;letter-spacing:.01em}
+
+  /* Upgrade-Treppe */
+  .stairs{display:flex;align-items:flex-end;gap:6px;flex-wrap:wrap}
+  .stair{flex:1 1 0;min-width:96px;background:var(--surface-2);border:1px solid var(--line);border-radius:11px;
+    padding:14px 13px;text-align:center;transition:.18s}
+  .stair.past{opacity:.6}
+  .stair.current{background:var(--petrol);border-color:var(--petrol);transform:translateY(-4px);
+    box-shadow:0 12px 26px -16px rgba(6,66,62,.6)}
+  .stair.current .stair-name,.stair.current .stair-sub{color:#fff}
+  .stair.current .stair-dot{background:#fff;color:var(--petrol)}
+  .stair.future{border-style:dashed;border-color:var(--info-line)}
+  .stair-dot{width:26px;height:26px;border-radius:50%;background:var(--petrol-tint);color:var(--petrol-dk);
+    display:grid;place-items:center;margin:0 auto 8px;font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:12px}
+  .stair-name{font-family:"Space Grotesk",sans-serif;font-weight:600;font-size:15px;color:var(--ink)}
+  .stair-sub{font-size:11px;color:var(--slate);margin-top:3px;line-height:1.3}
+  .stair-arrow{align-self:center;color:var(--slate);font-size:18px;flex:0 0 auto;padding-bottom:14px}
+  .stairs-note{font-size:13px;color:var(--ink-soft);margin-top:12px}
+
+  /* Toast */
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(14px);z-index:60;
+    background:var(--petrol-dk);color:#fff;font-size:13.5px;padding:12px 20px;border-radius:10px;
+    box-shadow:0 18px 40px -18px rgba(6,66,62,.6);opacity:0;pointer-events:none;transition:.24s;max-width:90vw;word-break:break-all}
+  .toast.show{opacity:1;transform:translateX(-50%)}
+
+  @media print{
+    .rail,.no-print,.nav,.toast,.exit-ov{display:none!important}
+    .wrap{display:block;max-width:100%;padding:0}
+    body{background:#fff}
+    .card{box-shadow:none;border:none;padding:0;animation:none}
+    .stair.current{box-shadow:none;transform:none}
+    .block{break-inside:avoid}
+  }
+
+  @media(max-width:860px){
+    .wrap{grid-template-columns:1fr;gap:18px;padding:18px 15px 50px}
+    .rail{position:static}
+    .path{display:flex;gap:4px;margin-top:16px;overflow-x:auto;padding-bottom:4px}
+    .path::before,.pfill{display:none}
+    .pstep{flex-direction:column;align-items:center;text-align:center;gap:6px;min-width:74px;padding:0}
+    .pmeta .t{font-size:11px}.railnote{display:none}
+    .card{padding:24px 20px}h1{font-size:24px}.q{font-size:20px}
+    .effrow{grid-template-columns:1fr auto;gap:4px 12px}.effd{grid-column:1/-1;order:3}
+    .incl{flex-direction:column;gap:8px}
+  }
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <aside class="rail">
+    <div class="brand">Schnittstellen-Entscheidung<small>SuperOffice · Presales</small></div>
+    <nav class="path" id="path"><div class="pfill" id="pfill"></div></nav>
+    <p class="railnote">Eine Treppenstufe wählen, Module andocken. Der Kunde beschreibt seinen Prozess — das Werkzeug leitet Paket, Technologie und Aufwand ab.</p>
+  </aside>
+  <main class="stage" id="stage"></main>
+</div>
+
+<script>
+const CHECK='<svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ARROW='<svg viewBox="0 0 24 24" width="17" height="17" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+const LAYERS=[{k:'00',t:'Qualifizierung'},{k:'01',t:'Paket & Module'},{k:'02',t:'Komplexität'},{k:'→',t:'Empfehlung'}];
+
+// Strecken-Katalog (us = unser Aufwand PT Basis/DataBridge; db/rest = ERP-Entwickler [von,bis]; db:null = nur REST)
+const ST={
+  firma:        {n:'Firma',                         dir:'ERP→SO', us:1.0, db:[0.5,1],  rest:[1.5,2.5]},
+  erstanlage:   {n:'Erstanlage Interessent',        dir:'SO→ERP', us:1.5, db:[1,2],    rest:[2,3]},
+  angebotskopf: {n:'Angebotskopf → Verkaufschance',  dir:'ERP→SO', us:1.5, db:[1,1.5],  rest:[2,3]},
+  nachfass:     {n:'Nachfassaktivität',              dir:'SO',     us:0.5, db:[0,0],    rest:[0,0]},
+  positionen:   {n:'Angebotspositionen (Varianten)', dir:'ERP→SO', us:3.0, db:null,     rest:[3,5]},
+  artikel:      {n:'Artikelstamm',                   dir:'ERP→SO', us:1.0, db:[0.5,1],  rest:[1.5,2]},
+  insightKonto: {n:'Umsatz / offene Posten',         dir:'ERP→SO', us:1.5, db:[1,2],    rest:[2,3]},
+  insightBelege:{n:'Auftrags-/Rechnungsstatus',      dir:'ERP→SO', us:1.5, db:[1,2],    rest:[2,3]},
+  personErp:    {n:'Person (ERP→SO)',                dir:'ERP→SO', us:0.5, db:[0.5,0.5],rest:[1,1]},
+  personSo:     {n:'Person (SO→ERP)',                dir:'SO→ERP', us:0.5, db:[0.5,1],  rest:[1,1.5]},
+  personBidi:   {n:'Person (bidirektional)',         dir:'bidir.', us:1.0, db:null,     rest:[2,3]},
+  custom:       {n:'Zusatztabelle (ERP→SO)',         dir:'ERP→SO', us:1.5, db:[0.5,1.5],rest:[2,4]},
+  customRest:   {n:'Zusatztabelle (Sonderlogik)',    dir:'frei',   us:2.0, db:null,     rest:[2,4]},
+};
+
+const TIERS=[
+  {id:'entry', name:'Entry — Stammdaten & Erstanlage', pill:'Stufe 1',
+   tagline:'Einsteiger-Schnittstelle · günstig, schnell startklar',
+   prozess:'Interessent/Neukunde im CRM anlegen und automatisch im ERP kaufmännisch verfügbar machen — Schlüssel kommt zurück.',
+   mehrwert:'Keine Doppelerfassung, kein Abtippen von Kundennummern. Die Firmenstrecke heilt sich bei Fehlern selbst.',
+   enthaelt:'Firma ERP→SO (laufend), Erstanlage Interessent SO→ERP mit Schlüssel-Rücklauf.',
+   nicht:'Angebote, Verkaufschancen, Positionen, kaufmännische Rückmeldung.'},
+  {id:'plus', name:'Plus — Angebotskopf & Nachfass', pill:'Stufe 2',
+   tagline:'Pipeline & Nachfass-Disziplin ohne manuelle Pflege',
+   prozess:'Aus jedem ERP-Angebot wird automatisch eine Verkaufschance im CRM — inklusive Erinnerung, dranzubleiben.',
+   mehrwert:'Vollständige Pipeline ohne manuelles Anlegen; der Außendienst wird aktiv zum Nachfassen geführt.',
+   enthaelt:'Alles aus Entry + Angebotskopf → Verkaufschance (anlegen/aktualisieren) + konfigurierbare Nachfassaktivität.',
+   nicht:'Angebotspositionen/Varianten, Artikelstamm, Rückmeldung von Umsatz/Status.'},
+  {id:'pro', name:'Pro — Angebot komplett', pill:'Stufe 3', rest:true,
+   tagline:'Das vollständige Angebot inkl. Positionen im CRM',
+   prozess:'Komplette Angebotsübernahme inkl. Positionen, Varianten und referenzierter Artikel.',
+   mehrwert:'Auswertbarkeit nach Produkten, vollständiges Deal-Bild, Basis für Cross- und Up-Sell.',
+   enthaelt:'Alles aus Plus + Angebotspositionen (Varianten/Versionen) + Artikelstamm ERP→SO.',
+   nicht:'Kaufmännische Rückmeldung (separat als Modul Insight).'},
+  {id:'custom_ext', name:'Individuell — freie Schnittstelle', pill:'Calculator', ext:true,
+   url:'https://schneifab.github.io/custom-interface-calculator/',
+   tagline:'Wenn keines der Standardpakete passt',
+   prozess:'Frei definierter Scope außerhalb des Standardkorridors — eigene Entitäten, Sonderlogik, abweichende Prozesse.',
+   mehrwert:'Volle Flexibilität. Aufwand wird im detaillierten Schnittstellen-Kalkulator strukturiert geschätzt.',
+   enthaelt:'Individuelle Aufwandsabschätzung im Calculator (ERP-Profil, Entitäten, Prozesse, Betrieb, Preis).',
+   nicht:'Keine Standard-Treppe, keine Pauschale — der Calculator übernimmt ab hier.'},
+];
+
+const MODULES=[
+  {id:'insightKonto', name:'Insight Konto', pill:'Modul',
+   d:'Vertriebssteuerung am Konto: Umsatzgröße, guter Zahler, Außenstände auf einen Blick.',
+   enthaelt:'Umsatz + offene Posten / Zahlverhalten, aggregiert am Unternehmen, lesend (ERP→SO), periodisch.',
+   nicht:'Beleg- oder Auftragsstatus pro Vorgang → das ist Insight Belege.'},
+  {id:'insightBelege', name:'Insight Belege', pill:'Modul',
+   d:'Innendienst/Service sieht den Status laufender Vorgänge direkt am Kunden.',
+   enthaelt:'Auftrags-/Rechnungsstatus pro Beleg, lesend (ERP→SO), höhere Frequenz.',
+   nicht:'Aggregierte Konto-KPIs (Umsatz/OP) → das ist Insight Konto.'},
+  {id:'custom', name:'Zusatztabellen (Standard)', pill:'Modul',
+   d:'Zusätzliche Tabellen außerhalb des Standardkorridors — z. B. Verträge, Geräte, Maschinen, Servicefälle.',
+   enthaelt:'Frei definierte Tabelle, lesend ERP→SO, periodisch. Import über DataBridge — kein REST nötig.',
+   nicht:'Synchroner Rücklauf, Zielfeld-Bedingung oder Merge-Logik → das ist „Sonderlogik“ (siehe unten oder Schicht 02).'},
+  {id:'customRest', name:'Zusatztabellen mit Sonderlogik', pill:'REST', rest:true,
+   d:'Eigene Tabellen, die echte REST-Fähigkeiten brauchen — nicht nur ein Import.',
+   enthaelt:'Frei definierte Strecke mit synchroner Bestätigung, Zielfeld-Prüfung oder feldweiser Merge-Logik.',
+   nicht:'Keine Pauschale — individuelle Schätzung. Reicht ein simpler Import, nimm „Zusatztabellen (Standard)“.'},
+];
+
+const PERSONS=[
+  {id:'none', t:'Die Firma reicht — kein Personen-Sync', d:'Das ERP kennt nur die Firma als Rechnungsempfänger; Ansprechpartner leben im CRM. Das ist der Normalfall.'},
+  {id:'erp2so', t:'ERP-Kontakte in SO sichtbar machen (ERP→SO)', d:'Im ERP gepflegte Kontakte (Buchhaltung, Besteller) sollen im CRM erscheinen.'},
+  {id:'so2erp', t:'ERP braucht einen Ansprechpartner für einen Beleg (SO→ERP)', d:'Ein konkreter ERP-Prozess (Auftrag, Lieferschein) benötigt einen Kontakt aus dem CRM.'},
+  {id:'bidi', t:'Beide Seiten pflegen Kontakte aktiv (bidirektional)', warn:'Selten wirklich nötig. Löst Dubletten- und Master-Pflege aus und erfordert REST mit Konfliktregel pro Feld. Prüfe, ob eine Richtung reicht.'},
+];
+
+const FLAGS=[
+  {id:'sync', t:'Synchrone Bestätigung im selben Vorgang', d:'Schlüssel/Antwort muss sofort im selben Call zurück — nicht zeitversetzt.', reason:'synchrone Bestätigung im selben Vorgang'},
+  {id:'targetfield', t:'Bedingung gegen das SO-Zielfeld', d:'„Nur überschreiben, wenn in SO nicht bereits Status X steht.“', reason:'eine Bedingung gegen den SO-Zielfeldwert'},
+  {id:'massrealtime', t:'Massenänderungen in Echtzeit (>30/Min)', d:'Viele Änderungen pro Minute, die sofort fließen müssen.', reason:'Massenänderungen über dem Instant-Job-Limit (30/Min)'},
+];
+
+let state={step:0, restCapable:null, fileCapable:null, tier:null, modules:new Set(), persons:'none', migration:null, flags:new Set(), viewMode:'intern', locked:false};
+const STEPS=['start','q_rest','q_file','q_tier','q_modules','q_persons','q_migration','q_flags','result'];
+const layerForStep={start:-1,q_rest:0,q_file:0,q_tier:1,q_modules:1,q_persons:1,q_migration:1,q_flags:2,result:3};
+const stage=document.getElementById('stage');
+
+function buildPath(){const p=document.getElementById('path');
+  LAYERS.forEach((l,i)=>{const el=document.createElement('div');el.className='pstep';el.id='pl'+i;
+    el.innerHTML=`<div class="pdot">${l.k}</div><div class="pmeta"><div class="k">Schicht ${l.k}</div><div class="t">${l.t}</div></div>`;p.appendChild(el);});}
+function updatePath(){const cur=layerForStep[STEPS[state.step]];
+  LAYERS.forEach((_,i)=>{const el=document.getElementById('pl'+i);el.className='pstep';
+    if(i<cur)el.classList.add('done');if(i===cur)el.classList.add('active');});
+  const frac=cur<0?0:Math.min(cur/(LAYERS.length-1),1);
+  document.getElementById('pfill').style.height=`calc((100% - 16px) * ${frac})`;}
+
+function render(){updatePath();const s=STEPS[state.step];
+  ({start:renderStart,q_rest:renderRest,q_file:renderFile,q_tier:renderTier,q_modules:renderModules,
+    q_persons:renderPersons,q_migration:renderMigration,q_flags:renderFlags,result:renderResult}[s])();}
+
+function shell(eyebrow,body){stage.innerHTML=`<div class="card"><div class="eyebrow">${eyebrow}</div>${body}</div>`;}
+function nav(backStep,nextLabel,nextFn,nextEnabled,count){
+  return `<div class="nav">${backStep!==null?`<button class="btn btn-ghost" id="back">Zurück</button>`:''}
+    <span class="spacer"></span>${count?`<span class="stepcount">${count}</span>`:''}
+    ${nextFn?`<button class="btn btn-primary" id="next" ${nextEnabled?'':'disabled'}>${nextLabel} ${ARROW}</button>`:''}</div>`;}
+function wireBack(to){const b=document.getElementById('back');if(b)b.onclick=()=>{state.step=to;render();};}
+// nav-Variante mit optionalem Pflicht-Hinweis (reqHint) vor dem Stepcount
+function navReq(backStep,nextLabel,nextEnabled,count,reqHint){
+  return `<div class="nav">${backStep!==null?`<button class="btn btn-ghost" id="back">Zurück</button>`:''}
+    <span class="spacer"></span>${reqHint||''}${count?`<span class="stepcount">${count}</span>`:''}
+    <button class="btn btn-primary" id="next" ${nextEnabled?'':'disabled'}>${nextLabel} ${ARROW}</button></div>`;}
+function optHTML(type,id,t,d,sel,extra){
+  return `<button class="opt ${type==='radio'?'radio':''} ${sel?'sel':''}" id="${id}">
+    <span class="box">${CHECK}</span><span class="opttext"><span class="ot">${t}${extra||''}</span>${d?`<span class="od">${d}</span>`:''}</span></button>`;}
+
+function fmtDate(ts){
+  try{const d=new Date(ts);const p=n=>String(n).padStart(2,'0');
+    return `${p(d.getDate())}.${p(d.getMonth()+1)}.${d.getFullYear()}, ${p(d.getHours())}:${p(d.getMinutes())}`;
+  }catch(e){return '';}}
+
+function historyBlock(){
+  const list=loadSaved();
+  if(!list.length)return '';
+  const items=list.map(e=>{
+    const techCls=e.tech==='Hybrid'?'h-hybrid':(e.tech==='REST'?'h-rest':'h-db');
+    return `<div class="hist-item" data-c="${e.c}">
+      <button class="hist-open" data-c="${e.c}">
+        <span class="hist-main"><span class="hist-pkg">${e.pkg}</span><span class="hist-meta">${fmtDate(e.ts)}</span></span>
+        <span class="hist-tech ${techCls}">${e.tech}</span>
+      </button>
+      <button class="hist-del" data-c="${e.c}" title="Aus Verlauf entfernen" aria-label="Aus Verlauf entfernen">×</button>
+    </div>`;}).join('');
+  return `<div class="hist">
+    <div class="hist-head"><span class="hist-title">Zuletzt erstellt</span>
+      <button class="hist-clear" id="hist-clear">Verlauf leeren</button></div>
+    <div class="hist-list">${items}</div>
+    <div class="hist-note"><span class="hist-note-ic">i</span><span>Dieser Verlauf liegt nur lokal in diesem Browser. Bei einem Browser- oder Gerätewechsel oder beim Löschen des Caches steht er nicht mehr zur Verfügung. Zum dauerhaften Sichern den Permalink über „Link kopieren“ teilen oder ablegen.</span></div>
+  </div>`;}
+
+function renderStart(){
+  shell('Presales-Leitfaden',`
+    <h1>Die richtige Schnittstelle in vier Schichten finden.</h1>
+    <p class="lead">Erst prüfen, was technisch geht. Dann genau eine Paketstufe wählen und passende Module andocken. Am Ende steht eine Empfehlung mit Technologie, Aufwand und Argumenten fürs Gespräch.</p>
+    <p class="hint">Die Treppe (Entry → Plus → Pro) baut aufeinander auf — jede Stufe trägt einen eigenen Prozess. Module wie Insight oder Personen docken quer dazu an.</p>
+    ${nav(null,'Starten',true,true)}
+    ${historyBlock()}`);
+  document.getElementById('next').onclick=()=>{state.step=1;render();};
+  // History-Interaktionen
+  document.querySelectorAll('.hist-open').forEach(b=>b.onclick=()=>{
+    const st=decodeState(b.getAttribute('data-c'));
+    if(st&&st.tier!==null){st.locked=false;st.viewMode='intern';state=st;render();}});
+  document.querySelectorAll('.hist-del').forEach(b=>b.onclick=(e)=>{
+    e.stopPropagation();deleteSaved(b.getAttribute('data-c'));render();});
+  const clr=document.getElementById('hist-clear');
+  if(clr)clr.onclick=()=>{clearSaved();render();};}
+
+function renderRest(){
+  const reqHint=state.restCapable===null?`<span class="reqhint"><span class="dotpulse"></span>Bitte wählen</span>`:'';
+  shell('Schicht 00 · Qualifizierung',`
+    <div class="q">Kann das ERP-System mit einem REST-Endpunkt sprechen?</div>
+    <p class="lead">Kann das ERP ausgehende Aufrufe an unseren Endpunkt absetzen <em>oder</em> unsere Aufrufe entgegennehmen?</p>
+    <div class="opts">
+      ${optHTML('radio','rc-yes','Ja','Das ERP kann REST ansprechen oder empfangen.',state.restCapable===true)}
+      ${optHTML('radio','rc-no','Nein oder unbekannt','Keine REST-Fähigkeit — oder die Kunden-IT weiß es noch nicht.',state.restCapable===false)}
+    </div>${navReq(0,'Weiter',state.restCapable!==null,'Schicht 00',reqHint)}`);
+  document.getElementById('rc-yes').onclick=()=>{state.restCapable=true;render();};
+  document.getElementById('rc-no').onclick=()=>{state.restCapable=false;render();};
+  wireBack(0);const n=document.getElementById('next');if(n)n.onclick=()=>{if(state.restCapable===null)return;state.step=state.restCapable?3:2;render();};}
+
+function renderFile(){
+  const reqHint=state.fileCapable===null?`<span class="reqhint"><span class="dotpulse"></span>Bitte wählen</span>`:'';
+  shell('Schicht 00 · Qualifizierung',`
+    <div class="q">Kann das ERP Dateien über SFTP oder SharePoint austauschen?</div>
+    <p class="lead">DataBridge arbeitet dateibasiert. Ohne REST ist das der einzige verbleibende Andockpunkt.</p>
+    <div class="opts">
+      ${optHTML('radio','fc-yes','Ja','Dateiaustausch über SFTP / SharePoint / OneDrive ist möglich.',state.fileCapable===true)}
+      ${optHTML('radio','fc-no','Nein','Weder REST noch Dateiaustausch.',state.fileCapable===false)}
+    </div>${navReq(1,'Weiter',state.fileCapable!==null,'Schicht 00',reqHint)}`);
+  document.getElementById('fc-yes').onclick=()=>{state.fileCapable=true;render();};
+  document.getElementById('fc-no').onclick=()=>{state.fileCapable=false;render();};
+  wireBack(1);const n=document.getElementById('next');if(n)n.onclick=()=>{if(state.fileCapable===null)return;state.step=state.fileCapable?3:8;render();};}
+
+function tierCard(tr){
+  const sel=state.tier===tr.id;
+  const pillClass=tr.ext?'pill-ext':(tr.rest?'pill-rest':'pill-tier');
+  const pillText=tr.ext?'Calculator':(tr.rest?'REST':tr.pill);
+  const extHint=tr.ext?`<span class="ext-hint">↗ Führt zum externen Schnittstellen-Kalkulator</span>`:'';
+  return `<button class="opt radio tier ${tr.ext?'tier-ext':''} ${sel?'sel':''}" id="t-${tr.id}">
+    <span class="box">${CHECK}</span>
+    <span class="tierbody">
+      <span class="tierhead"><span class="ot">${tr.name}</span><span class="pill ${pillClass}">${pillText}</span></span>
+      <span class="meta"><b>Prozess:</b> ${tr.prozess}</span>
+      <span class="meta"><b>Mehrwert:</b> ${tr.mehrwert}</span>
+      <span class="incl">
+        <span class="col yes"><span class="lbl">Enthält</span>${tr.enthaelt}</span>
+        <span class="col no"><span class="lbl">Noch nicht enthalten</span>${tr.nicht}</span>
+      </span>
+      ${extHint}
+    </span></button>`;}
+
+function renderTier(){
+  const univ=state.restCapable?'':`<span class="multi-tag">Universum: nur DataBridge-fähige Optionen</span>`;
+  const reqHint=state.tier===null?`<span class="reqhint"><span class="dotpulse"></span>Bitte eine Paketstufe wählen</span>`:'';
+  const isExt=state.tier==='custom_ext';
+  const nextLabel=isExt?'Zum Calculator':'Weiter';
+  shell('Schicht 01 · Paketstufe',`
+    <div class="q">Welche Prozessstufe braucht der Kunde?</div>
+    <p class="lead">Genau eine Stufe. Entry, Plus und Pro bauen aufeinander auf — wähle die höchste, die der Kunde wirklich nutzt. Passt keines, führt „Individuell“ zum detaillierten Kalkulator.</p>${univ}
+    <div class="opts">${TIERS.map(tierCard).join('')}</div>
+    <div id="tier-conflict"></div>
+    ${navReq(state.restCapable?1:2,nextLabel,state.tier!==null,'Schicht 01 · 1/4',reqHint)}`);
+  TIERS.forEach(tr=>{document.getElementById('t-'+tr.id).onclick=()=>{state.tier=tr.id;render();};});
+  document.getElementById('tier-conflict').innerHTML=isExt?'':restConflictNote();
+  wireBack(state.restCapable?1:2);
+  const n=document.getElementById('next');if(n)n.onclick=()=>{
+    if(state.tier===null)return;
+    if(state.tier==='custom_ext'){showExitOverlay();return;}
+    state.step=4;render();};}
+
+function moduleCard(m){
+  const sel=state.modules.has(m.id);
+  return `<button class="opt ${sel?'sel':''}" id="m-${m.id}">
+    <span class="box">${CHECK}</span>
+    <span class="tierbody">
+      <span class="tierhead"><span class="ot">${m.name}</span><span class="pill ${m.rest?'pill-rest':'pill-mod'}">${m.rest?'REST':m.pill}</span></span>
+      <span class="od">${m.d}</span>
+      <span class="incl">
+        <span class="col yes"><span class="lbl">Enthält</span>${m.enthaelt}</span>
+        <span class="col no"><span class="lbl">Nicht enthalten</span>${m.nicht}</span>
+      </span>
+    </span></button>`;}
+
+function renderModules(){
+  shell('Schicht 01 · Module',`
+    <div class="q">Welche Module sollen andocken?</div>
+    <p class="lead">Optional und kombinierbar. Module ergänzen die Stufe quer — nimm nur, was einen Prozess beim Kunden wirklich trägt.</p>
+    <div class="opts">${MODULES.map(moduleCard).join('')}</div>
+    <div id="mod-conflict"></div>
+    ${nav(3,'Weiter',true,true,'Schicht 01 · 2/4')}`);
+  MODULES.forEach(m=>{document.getElementById('m-'+m.id).onclick=()=>{
+    state.modules.has(m.id)?state.modules.delete(m.id):state.modules.add(m.id);render();};});
+  document.getElementById('mod-conflict').innerHTML=restConflictNote();
+  wireBack(3);document.getElementById('next').onclick=()=>{state.step=5;render();};}
+
+function renderPersons(){
+  shell('Schicht 01 · Personen',`
+    <div class="q">Braucht ein ERP-Prozess einen konkreten Ansprechpartner?</div>
+    <p class="lead">Auf „Personen synchronisieren?“ sagt fast jeder reflexhaft ja. Frage stattdessen nach dem echten Bedarf — bidirektional ist selten nötig und am teuersten.</p>
+    <div class="opts">
+      ${PERSONS.map(p=>optHTML('radio','p-'+p.id,p.t,(p.d||'')+(p.warn?`<span class="warn-inline">${p.warn}</span>`:''),state.persons===p.id)).join('')}
+    </div>
+    <div id="pers-conflict"></div>
+    ${nav(4,'Weiter',true,state.persons!==null,'Schicht 01 · 3/4')}`);
+  PERSONS.forEach(p=>{document.getElementById('p-'+p.id).onclick=()=>{state.persons=p.id;render();};});
+  document.getElementById('pers-conflict').innerHTML=restConflictNote();
+  wireBack(4);const n=document.getElementById('next');if(n)n.onclick=()=>{state.step=6;render();};}
+
+function renderMigration(){
+  const reqHint=state.migration===null?`<span class="reqhint"><span class="dotpulse"></span>Bitte wählen</span>`:'';
+  shell('Schicht 01 · Erstmigration',`
+    <div class="q">Muss zum Go-live ein großer Bestand erstmigriert werden?</div>
+    <p class="lead">Breite Altdaten (viele Felder, viele Tabellen, hohes Volumen) sind die Domäne von DataBridge — auch wenn der laufende Betrieb später REST nutzt.</p>
+    <div class="opts">
+      ${optHTML('radio','mg-yes','Ja, breite Erstmigration','Großer Altbestand wird einmalig übernommen.',state.migration===true)}
+      ${optHTML('radio','mg-no','Nein','Es geht nur um den laufenden Betrieb.',state.migration===false)}
+    </div>${navReq(5,'Weiter',state.migration!==null,'Schicht 01 · 4/4',reqHint)}`);
+  document.getElementById('mg-yes').onclick=()=>{state.migration=true;render();};
+  document.getElementById('mg-no').onclick=()=>{state.migration=false;render();};
+  wireBack(5);const n=document.getElementById('next');if(n)n.onclick=()=>{if(state.migration===null)return;state.step=7;render();};}
+
+function renderFlags(){
+  const flagChosen=state.flags.size>0; // mind. ein Flag ODER '__none'
+  const reqHint=flagChosen?'':`<span class="reqhint"><span class="dotpulse"></span>Bitte wählen oder „Nichts davon“</span>`;
+  shell('Schicht 02 · Komplexität',`
+    <div class="q">Trifft eines davon auf eine der Strecken zu?</div>
+    <p class="lead">Diese Flags heben einzelne Strecken auf REST. Trifft nichts zu, genügt DataBridge — günstiger und reifer.</p>
+    <div class="opts">
+      ${FLAGS.map(f=>optHTML('check','fl-'+f.id,f.t,f.d,state.flags.has(f.id),'<span class="pill pill-rest">REST</span>')).join('')}
+      ${optHTML('check','fl-none','Nichts davon','Kein Bedarf an Synchronität oder Zielfeld-Logik.',state.flags.has('__none'))}
+    </div>
+    <div id="flag-conflict"></div>
+    ${navReq(6,'Empfehlung anzeigen',flagChosen,'Schicht 02',reqHint)}`);
+  FLAGS.forEach(f=>{document.getElementById('fl-'+f.id).onclick=()=>{
+    state.flags.delete('__none');
+    state.flags.has(f.id)?state.flags.delete(f.id):state.flags.add(f.id);render();};});
+  document.getElementById('fl-none').onclick=()=>{state.flags.clear();state.flags.add('__none');render();};
+  document.getElementById('flag-conflict').innerHTML=restConflictNote();
+  wireBack(6);document.getElementById('next').onclick=()=>{if(state.flags.size===0)return;state.step=8;render();};}
+
+/* ---------- compute ---------- */
+// Liefert eine weiche Inline-Warnung, wenn die bisherige Auswahl REST erzwingt,
+// der Kunde aber (laut Schicht 00) nicht REST-fähig ist. Gibt '' zurück, wenn kein Konflikt.
+function restConflictNote(){
+  if(state.restCapable!==false) return '';
+  const reasons=[];
+  if(state.tier==='pro') reasons.push('Pro (Angebotspositionen mit Varianten)');
+  if(state.modules.has('customRest')) reasons.push('Zusatztabellen mit Sonderlogik');
+  if(state.persons==='bidi') reasons.push('bidirektionale Personen-Synchronisation');
+  [...state.flags].filter(x=>x!=='__none').forEach(id=>{const f=FLAGS.find(x=>x.id===id);if(f)reasons.push(f.t);});
+  if(!reasons.length) return '';
+  return `<div class="inline-flag soft"><span class="ic">!</span><div><b>Hinweis:</b> Die Auswahl <b>${reasons.join(', ')}</b> erfordert einen REST-Endpunkt — der Kunde ist laut Schicht 00 aber nicht REST-fähig. Du kannst fortfahren; das Ergebnis zeigt dann den Konflikt und die Optionen (Umfang reduzieren oder ERP REST-fähig machen).</div></div>`;}
+
+function buildStrecken(){
+  const L=[ST.firma,ST.erstanlage];
+  if(state.tier==='plus'||state.tier==='pro'){L.push(ST.angebotskopf,ST.nachfass);}
+  if(state.tier==='pro'){L.push(ST.positionen,ST.artikel);}
+  if(state.modules.has('insightKonto'))L.push(ST.insightKonto);
+  if(state.modules.has('insightBelege'))L.push(ST.insightBelege);
+  if(state.persons==='erp2so')L.push(ST.personErp);
+  if(state.persons==='so2erp')L.push(ST.personSo);
+  if(state.persons==='bidi')L.push(ST.personBidi);
+  if(state.modules.has('custom'))L.push(ST.custom);
+  if(state.modules.has('customRest'))L.push(ST.customRest);
+  return L;}
+function workshopHours(){let h=4; // Entry: Firmen-Round-Trip
+  if(state.tier==='plus'||state.tier==='pro')h+=2;
+  if(state.tier==='pro')h+=4;
+  if(state.modules.has('insightKonto'))h+=2;
+  if(state.modules.has('insightBelege'))h+=2;
+  if(state.persons==='erp2so'||state.persons==='so2erp')h+=2;
+  if(state.persons==='bidi')h+=4;
+  if(state.modules.has('custom'))h+=2;
+  if(state.modules.has('customRest'))h+=2;return h;}
+
+function computeResult(){
+  if(state.restCapable===false&&state.fileCapable===false)return{dead:true};
+  const tierName={entry:'Entry',plus:'Plus',pro:'Pro'}[state.tier];
+  const tier=TIERS.find(t=>t.id===state.tier);
+  const mods=[];
+  if(state.modules.has('insightKonto'))mods.push('Insight Konto');
+  if(state.modules.has('insightBelege'))mods.push('Insight Belege');
+  if(state.persons&&state.persons!=='none')mods.push('Personen');
+  if(state.modules.has('custom'))mods.push('Zusatztabellen');
+  if(state.modules.has('customRest'))mods.push('Zusatztabellen+');
+  const pkg=tierName+(mods.length?' + '+mods.join(' + '):'');
+
+  const flagSet=[...state.flags].filter(x=>x!=='__none');
+  const restForced=state.tier==='pro'||state.modules.has('customRest')||state.persons==='bidi'||flagSet.length>0;
+  const reasons=[];
+  if(state.tier==='pro')reasons.push('Angebotspositionen mit Varianten/Versionen');
+  if(state.modules.has('customRest'))reasons.push('Zusatztabellen mit Sonderlogik (synchron/Zielfeld/Merge)');
+  if(state.persons==='bidi')reasons.push('bidirektionale Personen-Synchronisation mit Konfliktauflösung');
+  flagSet.forEach(id=>{const f=FLAGS.find(x=>x.id===id);if(f)reasons.push(f.reason);});
+
+  const tech=restForced?'REST':'DataBridge';
+  const hybrid=state.migration===true&&tech==='REST';
+  const conflict=restForced&&state.restCapable===false;
+  return{dead:false,pkg,tier,tagline:tier.tagline,mods,tech,hybrid,conflict,reasons:[...new Set(reasons)],flagSet,restForced};}
+
+function computeEffort(strecken){
+  const r05=x=>Math.round(x*2)/2;const restTech=(computeResult().tech==='REST'||computeResult().hybrid);
+  let usPoint=0,goLive=0,erpLo=0,erpHi=0,hasErp=false;
+  strecken.forEach(s=>{const inherent=(s.db===null);
+    usPoint+=s.us*((restTech&&!inherent)?1.5:1);
+    if(s.dir!=='SO'){goLive+=0.5;const band=restTech?s.rest:(s.db||s.rest);erpLo+=band[0];erpHi+=band[1];if(band[1]>0)hasErp=true;}});
+  let setupLo=1,setupHi=2,authLo=0,authHi=0,migLo=0,migHi=0;
+  if(restTech){authLo=1;authHi=2;}if(state.migration===true){migLo=1;migHi=2;}
+  const usLo=r05(usPoint*0.9+goLive+setupLo+authLo+migLo);
+  const usHi=r05(usPoint*1.1+goLive+setupHi+authHi+migHi);
+  if(restTech){erpLo+=1;erpHi+=2;}if(state.migration===true){erpLo+=1;erpHi+=2;}
+  return{usLo,usHi,wsHours:workshopHours(),erpLo:r05(erpLo),erpHi:r05(erpHi),hasErp,restTech};}
+
+/* ---------- Ergebnis-Darstellung ---------- */
+// Kundentaugliche Outcome-Sätze je Strecken-Schlüssel (intern -> Kundensprache)
+const OUTCOME={
+  firma:'Ihre Kundenstammdaten sind in CRM und ERP automatisch aktuell — ohne doppelte Pflege.',
+  erstanlage:'Neue Interessenten aus dem CRM stehen sofort kaufmännisch im ERP bereit.',
+  angebotskopf:'Jedes ERP-Angebot erscheint automatisch als Verkaufschance in Ihrer Pipeline.',
+  nachfass:'Ihr Vertrieb wird aktiv ans Nachfassen erinnert — keine Chance versandet.',
+  positionen:'Komplette Angebote inkl. aller Positionen und Varianten sind im CRM auswertbar.',
+  artikel:'Ihre Artikel erscheinen mit Namen statt Codes — direkt verständlich.',
+  insightKonto:'Ihr Außendienst sieht Umsatz und Zahlungsverhalten direkt am Unternehmen.',
+  insightBelege:'Innendienst und Service sehen den Status laufender Vorgänge auf einen Blick.',
+  personErp:'Im ERP gepflegte Ansprechpartner werden im CRM sichtbar.',
+  personSo:'CRM-Ansprechpartner stehen Ihren ERP-Prozessen zur Verfügung.',
+  personBidi:'Ansprechpartner bleiben auf beiden Seiten konsistent gepflegt.',
+  custom:'Ihre zusätzlichen Daten (z. B. Verträge oder Geräte) erscheinen automatisch im CRM.',
+  customRest:'Ihre individuellen Datenprozesse laufen in Echtzeit und regelbasiert.',
+};
+function outcomeFor(streckeObj){
+  const key=Object.keys(ST).find(k=>ST[k]===streckeObj);
+  return OUTCOME[key]||streckeObj.n;}
+
+// Visuelle Upgrade-Treppe (Entry -> Plus -> Pro), gewählte Stufe hervorgehoben
+function upgradeStairs(forCustomer){
+  if(!['entry','plus','pro'].includes(state.tier))return '';
+  const order=['entry','plus','pro'];
+  const cur=order.indexOf(state.tier);
+  const labels={entry:'Entry',plus:'Plus',pro:'Pro'};
+  const next={entry:'+ Angebotskopf & Pipeline',plus:'+ vollständige Angebote',pro:''};
+  const custNext={entry:'Mehr Pipeline-Automatik möglich',plus:'Komplette Angebotsübernahme möglich',pro:'Höchste Ausbaustufe erreicht'};
+  const steps=order.map((id,i)=>{
+    const cls=i<cur?'past':(i===cur?'current':'future');
+    const sub=i===cur?(forCustomer?'Ihre Wahl':'aktuell'):(i>cur?(forCustomer?'Ausbaustufe':next[order[i-1]]||''):'');
+    return `<div class="stair ${cls}"><div class="stair-dot">${i+1}</div><div class="stair-name">${labels[id]}</div>${sub?`<div class="stair-sub">${sub}</div>`:''}</div>`;
+  }).join('<div class="stair-arrow">→</div>');
+  const note=forCustomer
+    ? `<p class="stairs-note">${custNext[state.tier]}${state.tier!=='pro'?' — jederzeit zubuchbar, ohne neues Projekt.':'.'}</p>`
+    : (state.tier!=='pro'?`<p class="stairs-note">Upsell-Pfad offen: nächste Stufe ist „${labels[order[cur+1]]}“.</p>`:'');
+  return `<div class="block"><h3>${forCustomer?'Ihr Ausbaupfad':'Upgrade-Pfad'}</h3>
+    <div class="stairs">${steps}</div>${note}</div>`;}
+
+// Aktionsleiste + Modus-Schalter (oben auf der Ergebnisseite)
+function resultToolbar(){
+  // Gesperrter Kundenlink: kein Umschalter, keine internen Aktionen — nur Drucken.
+  if(state.locked){
+    return `<div class="resbar no-print">
+      <div class="lockedtag">Kundenansicht</div>
+      <div class="resactions">
+        <button class="btn-sm" id="act-print">PDF / Drucken</button>
+      </div>
+    </div>`;}
+  const isK=state.viewMode==='kunde';
+  return `<div class="resbar no-print">
+    <div class="modeswitch" role="tablist" aria-label="Ansicht wählen">
+      <button class="ms ${!isK?'on':''}" id="mode-intern" role="tab" aria-selected="${!isK}">Interne Sicht</button>
+      <button class="ms ${isK?'on':''}" id="mode-kunde" role="tab" aria-selected="${isK}">Kundensicht</button>
+    </div>
+    <div class="resactions">
+      <button class="btn-sm" id="act-copy">Link kopieren</button>
+      <button class="btn-sm" id="act-print">PDF / Drucken</button>
+    </div>
+  </div>`;}
+
+function renderResult(){
+  const r=computeResult();
+  if(r.dead){
+    shell('Schicht 00 · Ergebnis',`
+      <div class="dead"><div class="big">—</div>
+        <div class="q" style="margin-top:8px">Keine automatisierte Schnittstelle möglich</div>
+        <p class="lead" style="margin:10px auto 0">Das ERP kann weder einen REST-Endpunkt ansprechen noch Dateien über SFTP/SharePoint austauschen. Ohne Andockpunkt bleibt nur ein manueller Prozess oder eine vorgelagerte Projektklärung mit der Kunden-IT.</p></div>
+      <div class="warn amber"><span class="ic">!</span><div><b>Nächster Schritt:</b> Mit der Kunden-IT klären, ob das ERP nachrüstbar ist (API-Modul, Export-Automatik). Erst danach lässt sich ein Paket anbieten.</div></div>
+      ${nav(2,null,false,false)}`);
+    wireBack(2);addRestart();return;}
+
+  // Eigene Durchläufe automatisch in die History schreiben (nicht bei via Kundenlink geöffneten Ergebnissen)
+  if(!state.locked)recordHistory();
+
+  const techClass=r.hybrid?'tech-hybrid':(r.tech==='REST'?'tech-rest':'tech-db');
+  const techLabel=r.hybrid?'Hybrid':r.tech;
+  let techReason=r.hybrid?'Breite Erstmigration per DataBridge, laufende Strecken per REST.'
+    :(r.tech==='REST'?'Erfordert durch: '+r.reasons.join('; ')+'.'
+    :'Kein Bedarf an Synchronität oder Zielfeld-Logik — DataBridge ist günstiger und reifer.');
+
+  const strecken=buildStrecken();
+  const streckenHTML=strecken.map(s=>{
+    const isRest=(r.tech==='REST'||r.hybrid)&&s.dir!=='SO';
+    return `<div class="strecke"><span class="dir ${isRest?'rest':''}">${s.dir}</span><span>${s.n}</span></div>`;}).join('');
+
+  const eff=computeEffort(strecken);
+  const fmt=x=>Number.isInteger(x)?x:x.toFixed(1).replace('.',',');
+  const erpLabel=r.hybrid?'Hybrid · Bulk-Export + REST-Endpunkt':(r.tech==='REST'?'REST-Endpunkt bereitstellen':'dateibasierter Export (DataBridge)');
+  const effortHTML=`<div class="block"><h3>Grobe Aufwandsschätzung</h3><div class="eff">
+      <div class="effrow"><div class="effp">Wir · SuperOffice</div><div class="effv">${fmt(eff.usLo)}–${fmt(eff.usHi)} PT</div>
+        <div class="effd">Konfiguration, Feld-Mapping, Setup${eff.restTech?', REST-Entwicklung & Auth':''}, Test &amp; Go-live${state.migration===true?', Migrations-Support':''}.</div></div>
+      <div class="effrow"><div class="effp">Kunde · Workshop</div><div class="effv">ca. ${eff.wsHours} h</div>
+        <div class="effd">Spezifikationsworkshop: Feld-Mapping, Transformationen, Code-Tabellen. 2 h je Entität/Richtung, 4 h bei Bidirektionalität. Projektleitung übernehmen wir.</div></div>
+      ${eff.hasErp?`<div class="effrow"><div class="effp">ERP-Entwickler · Kunde/Partner</div><div class="effv">${fmt(eff.erpLo)}–${fmt(eff.erpHi)} PT</div>
+        <div class="effd">${erpLabel}${state.migration===true?' · inkl. Erstmigrations-Export':''}. Liegt außerhalb unseres Liefergegenstands.</div></div>`:''}
+    </div><p class="effnote">Grobe Orientierung für die Angebotsphase — keine Detailschätzung. PT = Personentage.</p></div>`;
+
+  let cost;
+  if(r.hybrid)cost=`<b>Hybrid.</b> Erstmigration über DataBridge (~150 €/Mt Standard bzw. ~230 € Professional). Laufende REST-Strecken: Implementierung ×1,5 + ~80 €/Mt Lizenz. <b>Wiederkehrende Ops-/Wartungs-Pauschale für REST separat einpreisen</b> (Monitoring, Retry, ERP-API-Bruchrisiko).`;
+  else if(r.tech==='REST')cost=`Implementierung ~1,5× je Strecke. ~80 €/Mt Lizenz. <b>Wiederkehrende Ops-/Wartungs-Pauschale separat einpreisen</b> — Hebel gegen die Margenfalle und euer Recurring Revenue.`;
+  else cost=`Implementierung ~1 Tag je Strecke. Lizenz ~150 €/Mt (bis 50k DS) bzw. ~230 €/Mt Professional (bis 150k). Out-of-Box-Monitoring inklusive.`;
+
+  const args=[];
+  if(state.tier==='entry'&&!r.flagSet.length)args.push('Positionierung: „Unser Entry-Level — besonders günstig, easy zum Starten.“ Der Upgrade-Pfad auf Plus/Pro bleibt offen.');
+  args.push('Self-Healing: Fällt ein Schlüssel-Rücklauf aus, trägt die Firmen-Gegenstrecke ihn beim nächsten Lauf automatisch nach.');
+  if(state.tier==='plus'||state.tier==='pro')args.push('Nachfass macht aus Sichtbarkeit Handlung — als konfigurierbare Regel mit Zuweisung/Dedup ausliefern, sonst kippt sie in Spam und wird abgeschaltet.');
+  if(state.tier==='pro')args.push('Angebotspositionen mit Varianten sind strukturell zu komplex für DataBridge — REST ist hier kein Aufpreis, sondern Voraussetzung.');
+  if(state.modules.has('insightKonto'))args.push('Insight Konto ist im Verkauf oft das wertvollste Modul: Der Außendienst sieht „guter Zahler / Umsatz X“ direkt am Unternehmen. Klar abgrenzen gegen Beleg-Status.');
+  if(state.modules.has('insightBelege'))args.push('Insight Belege bedient den Innendienst/Service — höhere Frequenz als die Konto-KPIs, deshalb eigenes Modul.');
+  if(r.tech==='REST'&&!r.hybrid)args.push('REST liefert synchron, in Echtzeit und mit Zielfeld-Logik — Fähigkeiten, die DataBridge gar nicht hat. Als Capability-Premium bepreisen, nicht als Aufschlag.');
+  if(r.tech==='DataBridge')args.push('DataBridge braucht keinen Code, bringt Monitoring/Alerting mit und hält die Implementierung günstig — ideal für den preissensiblen Einstieg.');
+
+  const modtags=r.mods.length?`<div class="modtags">${r.mods.map(m=>`<span class="modtag">+ ${m}</span>`).join('')}</div>`:'';
+
+  // --- Kundensicht: nur Outcomes, kein PT/Marge/Konflikt ---
+  if(state.viewMode==='kunde'){
+    const techTrust=r.hybrid
+      ? 'Bewährte Standard-Middleware für den Datenaustausch, kombiniert mit einer individuell entwickelten Echtzeit-Schnittstelle.'
+      : (r.tech==='REST'
+        ? 'Eine individuell für Sie entwickelte Echtzeit-Schnittstelle — direkt in Ihrer SuperOffice-Cloud.'
+        : 'Über eine bewährte, wartungsarme Standard-Middleware — robust und schnell startklar.');
+    const outcomes=strecken.map(s=>`<div class="arg">${outcomeFor(s)}</div>`);
+    const uniqueOut=[...new Set(outcomes)];
+    shell('Ihr Integrationspaket',`
+      ${resultToolbar()}
+      <div class="kbanner no-print">${state.locked?'Diese Ansicht wurde für Sie freigegeben.':'Kundensicht — projizierbar im Termin. Keine internen Zahlen sichtbar.'}</div>
+      <div class="res-head">
+        <div class="badge pkg"><div class="bk">Ihr Paket</div><div class="bv">${r.pkg}</div><div class="bt">${r.tagline}</div></div>
+      </div>${modtags}
+      <div class="block"><h3>Was Sie konkret gewinnen</h3>${uniqueOut.join('')}</div>
+      ${upgradeStairs(true)}
+      <div class="block"><h3>Wie es umgesetzt wird</h3><div class="cost">${techTrust}</div></div>
+      <p class="effnote">Unverbindliche Orientierung. Eine verbindliche Spezifikation erfolgt im gemeinsamen Workshop.</p>
+      ${state.locked?'':nav(7,null,false,false)}`);
+    wireResultActions();
+    if(!state.locked){wireBack(7);addRestart();}
+    return;}
+
+  // --- Interne Sicht (Default): volle Schätzung ---
+  shell('Schicht → · Empfehlung',`
+    ${resultToolbar()}
+    <div class="res-head">
+      <div class="badge pkg"><div class="bk">Empfohlenes Paket</div><div class="bv">${r.pkg}</div><div class="bt">${r.tagline}</div></div>
+      <div class="badge ${techClass}"><div class="bk">Technologie</div><div class="bv">${techLabel}</div><div class="bt">${techReason}</div></div>
+    </div>${modtags}
+    ${r.conflict?`<div class="warn red"><span class="ic">!</span><div><b>Konflikt:</b> Der gewählte Umfang erfordert REST, aber der Kunde kann keinen REST-Endpunkt ansprechen/empfangen. Optionen: Umfang reduzieren (Pro/Positionen, Zusatztabellen mit Sonderlogik, bidirektionale Personen oder Synchronität streichen → DataBridge) <b>oder</b> ERP-seitig die REST-Voraussetzung schaffen.</div></div>`:''}
+    ${state.persons==='bidi'?`<div class="warn amber"><span class="ic">!</span><div><b>Personen bidirektional:</b> Selten wirklich nötig. Prüfe, ob ERP→SO oder SO→ERP reicht. Sonst Master-Regel pro Feld und Dubletten-Logik fest einplanen.</div></div>`:''}
+    ${upgradeStairs(false)}
+    <div class="block"><h3>Enthaltene Strecken</h3>${streckenHTML}</div>
+    ${effortHTML}
+    <div class="block"><h3>Kostentreiber</h3><div class="cost">${cost}</div></div>
+    <div class="block"><h3>Argumente fürs Gespräch</h3>${args.map(a=>`<div class="arg">${a}</div>`).join('')}</div>
+    ${r.tech==='DataBridge'&&state.restCapable?`<div class="warn info"><span class="ic">i</span><div>Der Kunde ist REST-fähig, der Umfang verlangt es aber nicht. Bewusst DataBridge wählen hält den Preis niedrig — REST bleibt als Ausbaustufe im Köcher.</div></div>`:''}
+    ${nav(7,null,false,false)}`);
+  wireResultActions();wireBack(7);addRestart();}
+
+// Verdrahtet Modus-Schalter und Aktionsbuttons der Ergebnisseite
+function wireResultActions(){
+  const mi=document.getElementById('mode-intern'),mk=document.getElementById('mode-kunde');
+  if(mi)mi.onclick=()=>{state.viewMode='intern';render();};
+  if(mk)mk.onclick=()=>{state.viewMode='kunde';render();};
+  const copy=document.getElementById('act-copy');
+  if(copy)copy.onclick=()=>showLinkOverlay();
+  const pr=document.getElementById('act-print');
+  if(pr)pr.onclick=()=>window.print();}
+
+function toast(msg){
+  let t=document.getElementById('toast');
+  if(!t){t=document.createElement('div');t.id='toast';t.className='toast';document.body.appendChild(t);}
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),2600);}
+
+// Kopiert Text in die Zwischenablage; bei blockiertem Clipboard zeigt der Toast den Link zum manuellen Kopieren.
+function copyText(text,okMsg){
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(()=>toast(okMsg),()=>toast(text));
+  }else toast(text);}
+
+// Auswahl vor dem Teilen: Kundenlink (gesperrte Kundensicht) oder interner Link (voll umschaltbar).
+function showLinkOverlay(){
+  const ov=document.createElement('div');
+  ov.className='exit-ov';ov.id='link-ov';
+  ov.innerHTML=`<div class="exit-card" role="dialog" aria-modal="true" aria-labelledby="link-title">
+    <div class="exit-eyebrow">Teilen-Link erstellen</div>
+    <h2 id="link-title">Für wen ist der Link?</h2>
+    <p>Wähle, welchen Umfang der Empfänger sieht. Ein Kundenlink öffnet ausschließlich die Kundensicht — ohne Umschalter, ohne Aufwände oder interne Hinweise.</p>
+    <div class="link-opts">
+      <button class="link-opt" id="link-cust">
+        <div class="lo-head"><span class="lo-name">Kundenlink</span><span class="lo-pill cust">Nur Kundensicht</span></div>
+        <div class="lo-desc">Gesperrt auf Outcomes, Pakete und Ausbaupfad. Kein Zugriff auf die interne Sicht.</div>
+      </button>
+      <button class="link-opt" id="link-int">
+        <div class="lo-head"><span class="lo-name">Interner Link</span><span class="lo-pill int">Voll · umschaltbar</span></div>
+        <div class="lo-desc">Für Kolleg:innen. Enthält Aufwände, Kostentreiber und beide Sichten.</div>
+      </button>
+    </div>
+    <div class="exit-nav"><button class="btn btn-ghost" id="link-cancel">Abbrechen</button></div>
+  </div>`;
+  document.body.appendChild(ov);
+  requestAnimationFrame(()=>ov.classList.add('show'));
+  const close=()=>{ov.classList.remove('show');setTimeout(()=>ov.remove(),220);};
+  document.getElementById('link-cancel').onclick=close;
+  ov.onclick=(e)=>{if(e.target===ov)close();};
+  document.addEventListener('keydown',function esc(e){if(e.key==='Escape'){close();document.removeEventListener('keydown',esc);}});
+  document.getElementById('link-cust').onclick=()=>{copyText(permalink(true),'Kundenlink kopiert — zeigt nur die Kundensicht.');close();};
+  document.getElementById('link-int').onclick=()=>{copyText(permalink(false),'Interner Link kopiert — voll & umschaltbar.');close();};}
+
+function showExitOverlay(){
+  const tr=TIERS.find(t=>t.id==='custom_ext');
+  const ov=document.createElement('div');
+  ov.className='exit-ov';ov.id='exit-ov';
+  ov.innerHTML=`<div class="exit-card" role="dialog" aria-modal="true" aria-labelledby="exit-title">
+    <div class="exit-ic">↗</div>
+    <div class="exit-eyebrow">Sie verlassen den Entscheidungsbaum</div>
+    <h2 id="exit-title">Weiter zum Schnittstellen-Kalkulator</h2>
+    <p>Für eine individuelle Schnittstelle ist der detaillierte Kalkulator das richtige Werkzeug. Er erfasst ERP-Profil, Authentifizierung, beliebige Entitäten, Prozesse und Betrieb strukturiert und liefert eine kalibrierbare Aufwandsschätzung.</p>
+    <p class="exit-url">${tr.url}</p>
+    <div class="exit-nav">
+      <button class="btn btn-ghost" id="exit-cancel">Zurück</button>
+      <a class="btn btn-primary" id="exit-go" href="${tr.url}" target="_blank" rel="noopener noreferrer">Calculator öffnen ${ARROW}</a>
+    </div>
+  </div>`;
+  document.body.appendChild(ov);
+  requestAnimationFrame(()=>ov.classList.add('show'));
+  const close=()=>{ov.classList.remove('show');setTimeout(()=>ov.remove(),220);};
+  document.getElementById('exit-cancel').onclick=close;
+  ov.onclick=(e)=>{if(e.target===ov)close();};
+  document.addEventListener('keydown',function esc(e){if(e.key==='Escape'){close();document.removeEventListener('keydown',esc);}});
+  // Nach Klick auf "öffnen" das Overlay schließen, der Link öffnet selbst im neuen Tab
+  document.getElementById('exit-go').addEventListener('click',()=>setTimeout(close,80));
+  document.getElementById('exit-go').focus();}
+
+function addRestart(){const navEl=stage.querySelector('.nav');
+  const b=document.createElement('button');b.className='btn btn-primary';b.innerHTML='Neu starten';
+  b.onclick=()=>{state={step:0,restCapable:null,fileCapable:null,tier:null,modules:new Set(),persons:'none',migration:null,flags:new Set(),viewMode:'intern',locked:false};render();};
+  navEl.appendChild(b);}
+
+/* ---------- Permalink & Speichern ---------- */
+// state -> kompakter String. Sets werden zu Arrays. step wird auf Ergebnis (8) gesetzt.
+// forCustomer=true setzt das Flag k:1 -> Link öffnet ausschließlich die gesperrte Kundensicht.
+function encodeState(forCustomer){
+  const o={r:state.restCapable,f:state.fileCapable,t:state.tier,
+    m:[...state.modules],p:state.persons,g:state.migration,x:[...state.flags]};
+  if(forCustomer)o.k=1;
+  try{return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/=+$/,'');}catch(e){return '';}}
+function decodeState(str){
+  try{const o=JSON.parse(decodeURIComponent(escape(atob(str))));
+    const locked=o.k===1;
+    return {step:8,restCapable:o.r??null,fileCapable:o.f??null,tier:o.t??null,
+      modules:new Set(o.m||[]),persons:o.p??'none',migration:o.g??null,flags:new Set(o.x||[]),
+      viewMode:locked?'kunde':'intern',locked};
+  }catch(e){return null;}}
+// Baut den Teilen-Link auf Basis der AKTUELLEN Domain (funktioniert unter jeder URL, auch GitHub Pages)
+function permalink(forCustomer){
+  const base=window.location.origin+window.location.pathname;
+  return base+'?c='+encodeState(forCustomer);}
+function restoreFromURL(){
+  const params=new URLSearchParams(window.location.search);
+  const c=params.get('c');
+  if(!c)return false;
+  const st=decodeState(c);
+  if(!st||st.tier===null)return false;
+  state=st;return true;}
+
+const LS_KEY='so_schnittstellen_configs';
+function loadSaved(){try{return JSON.parse(localStorage.getItem(LS_KEY)||'[]');}catch(e){return [];}}
+function deleteSaved(code){
+  try{const list=loadSaved().filter(e=>e.c!==code);
+    localStorage.setItem(LS_KEY,JSON.stringify(list));return true;}catch(e){return false;}}
+function clearSaved(){try{localStorage.removeItem(LS_KEY);return true;}catch(e){return false;}}
+// Schreibt die aktuelle Konfiguration automatisch in die History (interner Permalink, ohne k-Flag).
+// Dedup: gleiche Konfiguration wandert nach oben statt doppelt zu erscheinen.
+function recordHistory(){
+  const code=encodeState(false);
+  if(!code)return;
+  const r=computeResult();
+  if(r.dead||!state.tier)return;
+  const entry={c:code, pkg:r.pkg, tech:r.hybrid?'Hybrid':r.tech, ts:Date.now()};
+  try{
+    let list=loadSaved().filter(e=>e.c!==code);
+    list.unshift(entry);
+    localStorage.setItem(LS_KEY,JSON.stringify(list.slice(0,8)));
+  }catch(e){/* localStorage blockiert — History bleibt leer, kein Fehler nach außen */}}
+
+/* ---------- Start ---------- */
+buildPath();
+if(restoreFromURL()){render();}else{render();}
+</script>
+</body>
+</html>
