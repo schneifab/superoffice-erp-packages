@@ -206,21 +206,6 @@
     padding:7px 15px;border-radius:7px;cursor:pointer;transition:.16s}
   .modeswitch .ms.on{background:var(--petrol);color:#fff}
   .modeswitch .ms:not(.on):hover{color:var(--petrol)}
-  .lockedtag{display:inline-flex;align-items:center;font-family:"IBM Plex Mono",monospace;font-size:11px;
-    font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--petrol-dk);
-    background:var(--petrol-tint);border:1px solid var(--petrol);border-radius:8px;padding:7px 14px}
-  .link-opts{display:flex;flex-direction:column;gap:11px;margin:18px 0 4px}
-  .link-opt{text-align:left;width:100%;cursor:pointer;background:var(--surface);border:1.5px solid var(--line);
-    border-radius:11px;padding:14px 16px;font:inherit;color:inherit;transition:.16s}
-  .link-opt:hover{border-color:var(--petrol);background:var(--surface-2)}
-  .link-opt:focus-visible{outline:3px solid var(--petrol-tint);outline-offset:2px}
-  .lo-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px}
-  .lo-name{font-weight:600;font-size:15.5px;color:var(--ink)}
-  .lo-pill{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;
-    padding:3px 9px;border-radius:6px;white-space:nowrap}
-  .lo-pill.cust{background:var(--petrol-tint);color:var(--petrol-dk)}
-  .lo-pill.int{background:var(--info-tint);color:var(--info)}
-  .lo-desc{font-size:12.5px;color:var(--ink-soft);line-height:1.4}
   .resactions{display:flex;gap:8px;flex-wrap:wrap}
   .btn-sm{font:inherit;font-size:12.5px;font-weight:600;border:1.5px solid var(--line);background:var(--surface);
     color:var(--ink-soft);border-radius:8px;padding:7px 13px;cursor:pointer;transition:.16s}
@@ -367,7 +352,7 @@ const FLAGS=[
   {id:'massrealtime', t:'Massenänderungen in Echtzeit (>30/Min)', d:'Viele Änderungen pro Minute, die sofort fließen müssen.', reason:'Massenänderungen über dem Instant-Job-Limit (30/Min)'},
 ];
 
-let state={step:0, restCapable:null, fileCapable:null, tier:null, modules:new Set(), persons:'none', migration:null, flags:new Set(), viewMode:'intern', locked:false};
+let state={step:0, restCapable:null, fileCapable:null, tier:null, modules:new Set(), persons:'none', migration:null, flags:new Set(), viewMode:'intern'};
 const STEPS=['start','q_rest','q_file','q_tier','q_modules','q_persons','q_migration','q_flags','result'];
 const layerForStep={start:-1,q_rest:0,q_file:0,q_tier:1,q_modules:1,q_persons:1,q_migration:1,q_flags:2,result:3};
 const stage=document.getElementById('stage');
@@ -656,14 +641,6 @@ function upgradeStairs(forCustomer){
 
 // Aktionsleiste + Modus-Schalter (oben auf der Ergebnisseite)
 function resultToolbar(){
-  // Gesperrter Kundenlink: kein Umschalter, keine internen Aktionen — nur Drucken.
-  if(state.locked){
-    return `<div class="resbar no-print">
-      <div class="lockedtag">Kundenansicht</div>
-      <div class="resactions">
-        <button class="btn-sm" id="act-print">PDF / Drucken</button>
-      </div>
-    </div>`;}
   const isK=state.viewMode==='kunde';
   return `<div class="resbar no-print">
     <div class="modeswitch" role="tablist" aria-label="Ansicht wählen">
@@ -739,7 +716,7 @@ function renderResult(){
     const uniqueOut=[...new Set(outcomes)];
     shell('Ihr Integrationspaket',`
       ${resultToolbar()}
-      <div class="kbanner no-print">${state.locked?'Diese Ansicht wurde für Sie freigegeben.':'Kundensicht — projizierbar im Termin. Keine internen Zahlen sichtbar.'}</div>
+      <div class="kbanner no-print">Kundensicht — projizierbar im Termin. Keine internen Zahlen sichtbar.</div>
       <div class="res-head">
         <div class="badge pkg"><div class="bk">Ihr Paket</div><div class="bv">${r.pkg}</div><div class="bt">${r.tagline}</div></div>
       </div>${modtags}
@@ -747,10 +724,8 @@ function renderResult(){
       ${upgradeStairs(true)}
       <div class="block"><h3>Wie es umgesetzt wird</h3><div class="cost">${techTrust}</div></div>
       <p class="effnote">Unverbindliche Orientierung. Eine verbindliche Spezifikation erfolgt im gemeinsamen Workshop.</p>
-      ${state.locked?'':nav(7,null,false,false)}`);
-    wireResultActions();
-    if(!state.locked){wireBack(7);addRestart();}
-    return;}
+      ${nav(7,null,false,false)}`);
+    wireResultActions();wireBack(7);addRestart();return;}
 
   // --- Interne Sicht (Default): volle Schätzung ---
   shell('Schicht → · Empfehlung',`
@@ -776,7 +751,9 @@ function wireResultActions(){
   if(mi)mi.onclick=()=>{state.viewMode='intern';render();};
   if(mk)mk.onclick=()=>{state.viewMode='kunde';render();};
   const copy=document.getElementById('act-copy');
-  if(copy)copy.onclick=()=>showLinkOverlay();
+  if(copy)copy.onclick=()=>{const link=permalink();
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(link).then(()=>toast('Link kopiert — direkt teilbar.'),()=>toast(link));}
+    else toast(link);};
   const save=document.getElementById('act-save');
   if(save)save.onclick=()=>{const name=prompt('Kalkulation speichern unter (z. B. Kundenname):','');
     if(name===null)return;saveConfig(name)?toast('Lokal gespeichert.'):toast('Speichern nicht möglich (Browser blockiert localStorage).');};
@@ -788,41 +765,6 @@ function toast(msg){
   if(!t){t=document.createElement('div');t.id='toast';t.className='toast';document.body.appendChild(t);}
   t.textContent=msg;t.classList.add('show');
   clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),2600);}
-
-// Kopiert Text in die Zwischenablage; bei blockiertem Clipboard zeigt der Toast den Link zum manuellen Kopieren.
-function copyText(text,okMsg){
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(text).then(()=>toast(okMsg),()=>toast(text));
-  }else toast(text);}
-
-// Auswahl vor dem Teilen: Kundenlink (gesperrte Kundensicht) oder interner Link (voll umschaltbar).
-function showLinkOverlay(){
-  const ov=document.createElement('div');
-  ov.className='exit-ov';ov.id='link-ov';
-  ov.innerHTML=`<div class="exit-card" role="dialog" aria-modal="true" aria-labelledby="link-title">
-    <div class="exit-eyebrow">Teilen-Link erstellen</div>
-    <h2 id="link-title">Für wen ist der Link?</h2>
-    <p>Wähle, welchen Umfang der Empfänger sieht. Ein Kundenlink öffnet ausschließlich die Kundensicht — ohne Umschalter, ohne Aufwände oder interne Hinweise.</p>
-    <div class="link-opts">
-      <button class="link-opt" id="link-cust">
-        <div class="lo-head"><span class="lo-name">Kundenlink</span><span class="lo-pill cust">Nur Kundensicht</span></div>
-        <div class="lo-desc">Gesperrt auf Outcomes, Pakete und Ausbaupfad. Kein Zugriff auf die interne Sicht.</div>
-      </button>
-      <button class="link-opt" id="link-int">
-        <div class="lo-head"><span class="lo-name">Interner Link</span><span class="lo-pill int">Voll · umschaltbar</span></div>
-        <div class="lo-desc">Für Kolleg:innen. Enthält Aufwände, Kostentreiber und beide Sichten.</div>
-      </button>
-    </div>
-    <div class="exit-nav"><button class="btn btn-ghost" id="link-cancel">Abbrechen</button></div>
-  </div>`;
-  document.body.appendChild(ov);
-  requestAnimationFrame(()=>ov.classList.add('show'));
-  const close=()=>{ov.classList.remove('show');setTimeout(()=>ov.remove(),220);};
-  document.getElementById('link-cancel').onclick=close;
-  ov.onclick=(e)=>{if(e.target===ov)close();};
-  document.addEventListener('keydown',function esc(e){if(e.key==='Escape'){close();document.removeEventListener('keydown',esc);}});
-  document.getElementById('link-cust').onclick=()=>{copyText(permalink(true),'Kundenlink kopiert — zeigt nur die Kundensicht.');close();};
-  document.getElementById('link-int').onclick=()=>{copyText(permalink(false),'Interner Link kopiert — voll & umschaltbar.');close();};}
 
 function showExitOverlay(){
   const tr=TIERS.find(t=>t.id==='custom_ext');
@@ -851,28 +793,24 @@ function showExitOverlay(){
 
 function addRestart(){const navEl=stage.querySelector('.nav');
   const b=document.createElement('button');b.className='btn btn-primary';b.innerHTML='Neu starten';
-  b.onclick=()=>{state={step:0,restCapable:null,fileCapable:null,tier:null,modules:new Set(),persons:'none',migration:null,flags:new Set(),viewMode:'intern',locked:false};render();};
+  b.onclick=()=>{state={step:0,restCapable:null,fileCapable:null,tier:null,modules:new Set(),persons:'none',migration:null,flags:new Set(),viewMode:'intern'};render();};
   navEl.appendChild(b);}
 
 /* ---------- Permalink & Speichern ---------- */
 // state -> kompakter String. Sets werden zu Arrays. step wird auf Ergebnis (8) gesetzt.
-// forCustomer=true setzt das Flag k:1 -> Link öffnet ausschließlich die gesperrte Kundensicht.
-function encodeState(forCustomer){
+function encodeState(){
   const o={r:state.restCapable,f:state.fileCapable,t:state.tier,
     m:[...state.modules],p:state.persons,g:state.migration,x:[...state.flags]};
-  if(forCustomer)o.k=1;
   try{return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/=+$/,'');}catch(e){return '';}}
 function decodeState(str){
   try{const o=JSON.parse(decodeURIComponent(escape(atob(str))));
-    const locked=o.k===1;
     return {step:8,restCapable:o.r??null,fileCapable:o.f??null,tier:o.t??null,
-      modules:new Set(o.m||[]),persons:o.p??'none',migration:o.g??null,flags:new Set(o.x||[]),
-      viewMode:locked?'kunde':'intern',locked};
+      modules:new Set(o.m||[]),persons:o.p??'none',migration:o.g??null,flags:new Set(o.x||[])};
   }catch(e){return null;}}
 // Baut den Teilen-Link auf Basis der AKTUELLEN Domain (funktioniert unter jeder URL, auch GitHub Pages)
-function permalink(forCustomer){
+function permalink(){
   const base=window.location.origin+window.location.pathname;
-  return base+'?c='+encodeState(forCustomer);}
+  return base+'?c='+encodeState();}
 function restoreFromURL(){
   const params=new URLSearchParams(window.location.search);
   const c=params.get('c');
